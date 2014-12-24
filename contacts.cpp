@@ -1,44 +1,82 @@
 #ifndef CONTACTS_CPP
 #define CONTACTS_CPP
 
+#include <fstream>
+
 #include "contacts.h"
 
+//constructors and destructor
+Contact::Contact(string newName, string newNumber, string newID)
+{
+	this->changeName(newName);
+	this->changeNumber(newNumber);
+	this->changeID(newID);
+}
+
+Contact::Contact()
+{
+}
+
+Contact::~Contact()
+{
+
+}
+
+
+//setters and getters
 string Contact::getName() const
 {
-	return this->name;
+	return name;
 }
 
 string Contact::getNumber() const
 {
-	return this->phoneNumber;
+	return phoneNumber;
 }
 
-unsigned short Contact::getID() const
+string Contact::getID() const
 {
-	return this->ID;
+	return ID;
 }
 
 bool Contact::changeName(string newName)
 {
-	if (newName != "")
+	if (newName.size() > 100)
 	{
-		this->name = newName;
+		cout << "Name is greater than 100 characters. Saving only the first 100.\n";
+
+		newName.resize(100); //resizes to contain only first 100 chars.
+		strcpy(name, newName.c_str());
 		return true;
 	}
-	else
+	else if (newName != "") //only assign name if it isn't empty
+	{
+		strcpy(name, newName.c_str());
+		return true;
+	}
+	else //if the name is empty
 	{
 		cout << "You can't change the name to an empty string!\n";
+
 		return false;
 	}
 }
 
-
-
 bool Contact::changeNumber(string newNumber)
 {
-	if (newNumber != "")
+	if (newNumber.size() > 10)
 	{
-		this->phoneNumber = newNumber;
+		cout << "The number of digits in the number is greater than 10."
+			<< " You must enter a number shorter than 10 digits\n";
+		return false;
+	}
+	else if (newNumber != "")
+	{
+		if (!validateNumber(newNumber))
+		{
+			return false;
+		}
+		strcpy(phoneNumber, newNumber.c_str());
 		return true;
 	}
 	else
@@ -48,324 +86,84 @@ bool Contact::changeNumber(string newNumber)
 	}
 }
 
-void Contact::changeID(unsigned int newID)
+bool Contact::changeID(string newID)
 {
-	this->ID = newID;
+	if (newID.size() > 10)
+	{
+		cout << "ID too big. Saving only first ten characters\n";
+		newID.resize(10);
+		strcpy(ID, newID.c_str());
+		return true;
+	}
+	else if (newID != "")
+	{
+		if (!validateNumber(newID))
+		{
+			return false;
+		}
+		strcpy(ID, newID.c_str());
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
-
-Contact::Contact(string newName, string newNumber, unsigned int newID)
-{
-	this->name = newName;
-	this->phoneNumber = newNumber;
-	this->ID = newID;
-}
-
-Contact::Contact()
-{
-}
-
 
 void Contact::enterInfo()
 {
 	string newName;
 	string newNumber;
-	unsigned short newID;
+	string newID;
 
-	cout << "Please enter a contact name: ";
-	cin >> newName;
+	cout << "Please enter a contact name shorter than 100 characters: ";
+	cin.ignore();
+	getline(cin, newName);
 	if (!changeName(newName))
 	{
-		cout << "Error. You will have to create the contact again!";
+		cout << "Error. You will have to create the contact again!\n\n";
 		return;
 	}
 
-	cout << "Please enter a phone number: ";
+	cout << "Please enter a phone number shorter than 10 digits: ";
 	cin >> newNumber;
 	if (!changeNumber(newNumber))
 	{
-		cout << "Error. You will have to create the contact again!";
+		cout << "Error. You will have to create the contact again!\n\n";
 		return;
 	}
 
-	cout << "Please enter an ID: ";
+	cout << "Please enter an ID shorter than 10 digits: ";
 	cin >> newID;
 	changeID(newID);
+
+	cout << "Contact successfully added!" << endl << endl;
 }
 
-ContactBook::~ContactBook()
+//save and load
+void Contact::saveContact()
 {
-	bookContacts.clear(); // dictionary objects clear from their own destructors
+	ofstream out("contactbook.dat", ios::app | ios::binary);
 
+	out.write((const char*)&(*this), sizeof(Contact));
+
+	out.close();
 }
 
-ContactBook::ContactBook()
+//utility
+bool Contact::validateNumber(string number)
 {
-}
-
-void ContactBook::addContact()
-{
-	Contact* temp = new Contact();
-	temp->enterInfo();
-	name.addElement(temp->getName(), temp);
-	phoneNumber.addElement(temp->getNumber(), temp);
-	ID.addElement(temp->getID(), temp);
-	
-	bookContacts.push_back(*temp);
-}
-
-//swaps two consecutive elements in the arrays
-void ContactBook::swapElements(unsigned int position)
-{
-	string swapName;
-	string swapNumber;
-	unsigned short swapID;
-	Contact swapContacts;
-	Contact* swapContact;
-
-	swapName = name.key[position];
-	name.key[position] = name.key[position + 1];
-	name.key[position + 1] = swapName;
-
-	swapNumber = phoneNumber.key[position];
-	phoneNumber.key[position] = phoneNumber.key[position + 1];
-	phoneNumber.key[position + 1] = swapNumber;
-
-	swapID = ID.key[position];
-	ID.key[position] = ID.key[position + 1];
-	ID.key[position + 1] = swapID;
-
-	swapContacts = bookContacts[position];
-	bookContacts[position] = bookContacts[position + 1];
-	bookContacts[position + 1] = swapContacts;
-
-	swapContact = name.value[position];
-	name.value[position] = name.value[position + 1];
-	name.value[position + 1] = swapContact;
-
-}
-
-void ContactBook::sortByName()
-{
-	for (unsigned int a = 0; a < name.key.size() - 1; a++)
+	for (unsigned int a = 0; a < number.size(); a++)
 	{
-		if (name.key[a] > name.key[a + 1])
+		if (number[a] < '0' || number[a] > '9')
 		{
-			swapElements(a);
-			a = -1;
+			cout << "You must only use digits for the number and ID, add the contact again\n";
+			return false;
 		}
 	}
+	return true;
 }
 
-void ContactBook::sortByNumber()
-{
-	for (unsigned int a = 0; a < phoneNumber.key.size() - 1; a++)
-		if (phoneNumber.key[a] > phoneNumber.key[a + 1])
-		{
-		swapElements(a);
-		a = -1;
-		}
-}
-
-void ContactBook::sortByID()
-{
-	for (unsigned int a = 0; a < ID.key.size() - 1; a++)
-		if (ID.key[a] > ID.key[a + 1])
-		{
-		swapElements(a);
-		a = -1;
-		}
-}
-
-void ContactBook::sortContactBook(unsigned int criterion)
-{
-	switch (criterion)
-	{
-	case 1:
-		sortByName();
-		break;
-	case 2:
-		sortByNumber();
-		break;
-	case 3:
-		sortByID();
-		break;
-	default:
-		requestNewCriterion();
-		break;
-	}
-}
-
-void ContactBook::requestNewCriterion()
-{
-	unsigned short newCriterion = 0;
-	while ((newCriterion < 1) || (newCriterion > 3))
-	{
-		cout << "Please enter: " << endl
-			<< "1 - For sorting the contacts book by name " << endl
-			<< "2 - For sorting the contacts book by phone number " << endl
-			<< "3 - For sorting the contacts book by ID " << endl
-			<< "Enter your choice: ";
-
-		cin >> newCriterion;
-	}
-
-	sortContactBook(newCriterion);
-}
-
-void ContactBook::printBook()
-{
-	requestNewCriterion();
-
-	for (unsigned int a = 0; a < name.key.size(); a++)
-	{
-		cout << " Name: " << name.key[a] << endl
-			<< "Number: " << phoneNumber.key[a] << endl
-			<< "ID: " << ID.key[a] << endl;
-	}
-}
-
-const Contact* ContactBook::findContact(unsigned int searchID) const
-{
-	for (unsigned int a = 0; a < ID.key.size(); a++)
-	{
-		if (ID.key[a] == searchID)
-		{
-			return ID.value[a];
-		}
-	}
-
-	return 0;
-
-}
-
-const Contact* ContactBook::findContact(string searchParameter) const
-{
-	for (unsigned int a = 0; a < name.key.size(); a++)
-	{
-		if (!(name.key[a].compare(searchParameter)))
-		{
-			return name.value[a];
-		}
-
-		else if (!(phoneNumber.key[a].compare(searchParameter)))
-		{
-			return phoneNumber.value[a];
-		}
-	}
-
-	return 0;
-}
-
-void ContactBook::removeContact()
-{
-	int choice;
-	string findString;
-	unsigned short findID;
-
-	cout << "How do you wish to find the contact which you want to delete?" << endl
-		<< "1. Name or Phone" << endl
-		<< "2. ID " << endl
-		<< "Enter your choice: " << endl;
-
-	cin >> choice;
-
-	if (choice == 1)
-	{
-		cout << "Enter the name or the number: ";
-		cin >> findString;
-
-		if (findContact(findString))
-		{
-			for (unsigned int a = 0; a < name.key.size(); a++)
-			{
-				if (name.key[a] == findString)
-				{
-					name.key.erase(name.key.begin() + a);
-					name.value.erase(name.value.begin() + a);
-
-					phoneNumber.key.erase(phoneNumber.key.begin() + a);
-					phoneNumber.value.erase(phoneNumber.value.begin() + a);
-
-					ID.key.erase(ID.key.begin() + a);
-					ID.value.erase(ID.value.begin() + a);
-
-					bookContacts.erase(bookContacts.begin() + a);
-
-					break;
-				}
-			}
-			cout << "Contact successfully removed!\n";
-		}
-	}
-
-	else if (choice == 2)
-	{
-		cout << "Enter the ID: ";
-		cin >> findID;
-
-		if (findContact(findID))
-		{
-			for (unsigned int a = 0; a < name.key.size(); a++)
-			{
-				if (ID.key[a] == findID)
-				{
-					name.key.erase(name.key.begin() + a);
-					name.value.erase(name.value.begin() + a);
-
-					phoneNumber.key.erase(phoneNumber.key.begin() + a);
-					phoneNumber.value.erase(phoneNumber.value.begin() + a);
-
-					ID.key.erase(ID.key.begin() + a);
-					ID.value.erase(ID.value.begin() + a);
-
-					bookContacts.erase(bookContacts.begin() + a);
-
-					break;
-				}
-			}
-			cout << "Contact successfully removed!\n";
-		}
-	}
-
-
-}
-
-void ContactBook::findMenu()
-{
-	cout << "Enter your search criteria: " << endl
-		<< "1. Name" << endl
-		<< "2. Phone Number" << endl
-		<< "3. ID" << endl;
-
-	int choice;
-	cin >> choice;
-
-	switch (choice)
-	{
-	case 1:{
-		string name;
-		cout << "Enter the name of the contact which you want find: ";
-		cin >> name;
-		this->findContact(name);
-		break;
-			}	
-	case 2:{
-		string number;
-		cout << "Enter the phone number of the contact which you want to find: ";
-		cin >> number;
-		this->findContact(number);
-		break;
-	}
-	case 3:{
-		unsigned int temp;
-		cout << "Enter the ID of the number which you want to find: ";
-		cin >> temp;
-		this->findContact(temp);
-		break;
-	}
-	default: return; break;
-	}
-}
 
 #endif // CONTACTS_CPP
 

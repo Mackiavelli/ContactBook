@@ -10,61 +10,63 @@
 
 using namespace std;
 
+struct ContactInfo
+{
+	char name[100];
+	char phoneNumber[10];
+	char ID[10];
+};
+
 class Contact
 {
 public:
+	//constructors and destructor
+	Contact();
+	Contact(string, string, string);
+	~Contact();
 
+	//getters and setters
 	string getName() const; //selectors
 	string getNumber() const;
-	unsigned short getID() const;
-
+	string getID() const;
 	bool changeName(string); //mutators
 	bool changeNumber(string);
-	void changeID(unsigned int);
+	bool changeID(string);
 	void enterInfo();
 
+	//save and load
+	void saveContact();
+	ContactInfo loadContact();
+
+	//utility
+	bool validateNumber(string);
+
+	//operators
 	friend ostream& operator<<(ostream& os, const Contact* ptr)
 	{
-		os << "Name: " << ptr->getName() << endl
+		os << endl 
+			<< "Name: " << ptr->getName() << endl
 			<< "Number: " << ptr->getNumber() << endl
 			<< "ID: " << ptr->getID() << endl;
 
 		return os;
 	}
 
-	Contact();
-	Contact(string, string, unsigned int);
+	friend ostream& operator<<(ostream& os, const Contact ptr)
+	{
+		os << endl
+			<< "Name: " << ptr.getName() << endl
+			<< "Number: " << ptr.getNumber() << endl
+			<< "ID: " << ptr.getID() << endl;
 
+		return os;
+	}
+	
 private:
-		string name;
-		string phoneNumber;
-		unsigned int ID;
+	//all the chars have an extra space for the null character
+	char name[101];
+	char phoneNumber[11];
+	char ID[11];
 };
-
-class ContactBook
-{
-public:
-	ContactBook();
-	void addContact();
-	const Contact* findContact(unsigned int) const;
-	const Contact* findContact(string) const;
-	void sortContactBook(unsigned int);
-	void removeContact();
-	void printBook();
-	void sortByName();
-	void sortByNumber();
-	void sortByID();
-	void requestNewCriterion();
-	void swapElements(unsigned int);
-	void findMenu();
-	~ContactBook();
-
-	vector<Contact> bookContacts;
-
-	Dictionary<string, Contact*> name;
-	Dictionary<string, Contact*> phoneNumber;
-	Dictionary<unsigned short, Contact*> ID;
-};
-
+	
 #endif
-
