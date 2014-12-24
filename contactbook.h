@@ -46,11 +46,17 @@ public:
 	//operators
 	friend ostream& operator<<(ostream& os, ContactBook& temp)
 	{
-		for (unsigned int a = 0; a < temp.bookContacts.size(); a++)
+		if (temp.size())
 		{
-			os << temp.bookContacts[a] << endl;
+			for (unsigned int a = 0; a < temp.bookContacts.size(); a++)
+			{
+				os << temp.bookContacts[a] << endl;
+			}
 		}
-
+		else
+		{
+			cout << "No contacts found!!!\n\n";
+		}
 		return os;
 	}
 

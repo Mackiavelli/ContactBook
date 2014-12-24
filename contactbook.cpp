@@ -174,7 +174,7 @@ const Contact* ContactBook::findContact(string searchParameter)
 			return ID.getValue(a);
 		}
 	}
-
+	cout << "No contact found with the given search parameters!\n\n";
 	return 0;
 }
 
@@ -390,6 +390,7 @@ void ContactBook::deleteContactBook()
 	phoneNumber.deleteDictionary();
 	bookContacts.clear();
 
+	cout << "Contact book database successfully deleted!'\n\n";
 	out.close();
 }
 void ContactBook::loadContactBook()

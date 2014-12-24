@@ -2,20 +2,12 @@
 #define CONTACTS_H
 
 #include "dictionary.h"
-#include "dictionary.cpp"
 #include <iostream>
 #include <vector>
 #include <string>
 #include <fstream>
 
 using namespace std;
-
-struct ContactInfo
-{
-	char name[100];
-	char phoneNumber[10];
-	char ID[10];
-};
 
 class Contact
 {
@@ -34,9 +26,8 @@ public:
 	bool changeID(string);
 	void enterInfo();
 
-	//save and load
+	//save
 	void saveContact();
-	ContactInfo loadContact();
 
 	//utility
 	bool validateNumber(string);
